@@ -8,18 +8,15 @@ let c0 = 299792458;
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DASHBOARD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-let dz = 0.006;
-let Nz = 400;
-let dt = 1e-11;
-
 /*SOURCE PARAMETERS*/
 let fmax = 5.0e9;
-let Amplitude = 10;
+let Amplitude = 50;
 
 /*GRID PARAMETERS*/
+/*Ask Dr. Rumpf how is it that I can improve the grid parameters*/
 let nmax = 1;
 let NLAM = 10;
-let NBUFZ = [100, 100];
+let NBUFZ = [300, 300];
 
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -27,10 +24,10 @@ let NBUFZ = [100, 100];
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*NOMINAL RESOLUTION*/
 let lam0 = c0/fmax;
-dz = lam0/nmax/NLAM;
+let dz = lam0/nmax/NLAM;
 
 /*COMPUTE GRID SIZE*/
-Nz = NBUFZ[0] + NBUFZ[1] + 3;
+let Nz = NBUFZ[0] + NBUFZ[1] + 3;
 
 /*COMPUTE AXIS*/
 let xa = Array(Nz).fill(1.0);
@@ -64,7 +61,7 @@ STEPS = Math.ceil(t/dt);
 
 /*COMPUTE THE SOURCE*/
 let nz_src = Math.round(Nz/2);
-t = Array(STEPS-1).fill(1.0*dt);
+t = Array(STEPS-1).fill(1.0);
 for(let i=0; i < t.length; i++)
 {
 	t[i] = i*dt;
@@ -134,9 +131,14 @@ function update()
 	}
 	
 	/*Inject E source*/
-	Ey[nz_src] = Ey[nz_src] + ESRC[T];
 	
-	T = (T + 1)%STEPS;
+	/*Controlling the amount of source injections gives a better simulation, 
+	ask Dr. Rumpf*/
+	if(T < 45)
+	{
+		Ey[nz_src] = Ey[nz_src] + ESRC[Math.ceil((T+1)/2)];
+		T++;
+	}
 }
 
 function plot(x, y, x0, y0)
