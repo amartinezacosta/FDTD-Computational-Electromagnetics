@@ -15,7 +15,7 @@ let Amplitude = 50;
 /*GRID PARAMETERS*/
 /*Ask Dr. Rumpf how is it that I can improve the grid parameters*/
 let nmax = 1;
-let NLAM = 10;
+let NLAM = 20;
 let NBUFZ = [300, 300];
 
 
@@ -30,10 +30,10 @@ let dz = lam0/nmax/NLAM;
 let Nz = NBUFZ[0] + NBUFZ[1] + 3;
 
 /*COMPUTE AXIS*/
-let xa = Array(Nz).fill(1.0);
-for(let i = 0; i < xa.length; i++)
+let za = Array(Nz).fill(1.0);
+for(let i = 0; i < za.length; i++)
 {
-	xa[i] = i*xa[i];
+	za[i] = i;
 }
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,7 +48,7 @@ let UR = Array(Nz).fill(1.0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*COMPUTE TIME STEP */
 let nbc = Math.sqrt(UR[0]*ER[0]);
-dt = nbc*dz/(2*c0);
+let dt = nbc*dz/(2*c0);
 
 /*COMPUTE SOURCE PARAMETERS*/
 let tau = 0.5/fmax;
@@ -57,21 +57,19 @@ let t0 = 5*tau;
 /*COMPUTE NUMBER OF TIME STEPS*/
 let tprop = nmax*Nz*dz/c0;
 let t = 2*t0 + 3*tprop;
-STEPS = Math.ceil(t/dt);
+let STEPS = Math.ceil(t/dt);
 
 /*COMPUTE THE SOURCE*/
-let nz_src = Math.round(Nz/2);
-t = Array(STEPS-1).fill(1.0);
+t = Array(STEPS).fill(1.0);
 for(let i=0; i < t.length; i++)
 {
 	t[i] = i*dt;
 }
-let ESRC = Array(2*t.length).fill(1.0);
-for(let i=0; i < ESRC.length; i+=2)
+let nz_src = Math.round(Nz/2);
+let ESRC = Array(t.length).fill(1.0);
+for(let i=0; i < ESRC.length; i++)
 {
-	/*This a complex number it could be a good idea to make this a clase*/
-	ESRC[i+0] = Amplitude*Math.cos(Math.pow((t[i] - t0)/tau,2));
-	ESRC[i+1] = Amplitude*Math.sin(Math.pow((t[i] - t0)/tau,2));
+	ESRC[i] = 0.1*Math.exp(((-t[i] + t0)/tau)^2);
 }
 
 
@@ -119,8 +117,10 @@ function update()
 	{
 		Hx[nz] = Hx[nz] + mHx[nz]*(Ey[nz+1] - Ey[nz])/dz;
 	}
+	
 	/*Dirichlet Boundary Condition for Hx*/
-	Hx[Nz] = Hx[Nz] + mHx[Nz]*(0 - Ey[Nz])/dz;
+	Hx[Nz-1] = Hx[Nz-1] + mHx[Nz-1]*(0 - Ey[Nz-1])/dz;
+	
 	
 	/*Dirichlet Boundary Condition for Ey*/
 	Ey[0] = Ey[0] + mEy[0]*(Hx[0] - 0)/dz;
@@ -134,29 +134,12 @@ function update()
 	
 	/*Controlling the amount of source injections gives a better simulation, 
 	ask Dr. Rumpf*/
-	if(T < 45)
+
+	if(T < STEPS)
 	{
-		Ey[nz_src] = Ey[nz_src] + ESRC[Math.ceil((T+1)/2)];
+		Ey[nz_src] = Ey[nz_src] + ESRC[T];
 		T++;
 	}
-}
-
-function plot(x, y, x0, y0)
-{
-	if(x.length != y.length)
-	{
-		return 0;
-	}
-	
-	context.beginPath();
-	context.moveTo(x0, y0);
-	for(let i = 0; i < x.length; i++)
-	{
-		context.lineTo(x0 + x[i], y0 - y[i]);
-		context.moveTo(x0 + x[i], y0 - y[i]);
-	}
-	context.strokeStyle = "#FF0000";
-	context.stroke();
 }
 
 function draw()
@@ -164,7 +147,8 @@ function draw()
 	update();
 		
 	context.clearRect(0,0,width,height);
-	plot(xa, Ey, 0, height/2);
+	plot(context, za, Ey, 0, height/2, "blue");
+	plot(context, za, Hx, 0, height/2, "red");
 	requestAnimationFrame(draw);
 }
 
