@@ -20,6 +20,10 @@ function plot(context, x, y, x0, y0, c)
 		case "red":
 			context.strokeStyle = "blue";
 			break;
+		case "green":
+			context.strokeStyle = "green";
+			break;
+			
 		default:
 			context.strokeStyle = "black";
 			break;

@@ -69,8 +69,12 @@ let nz_src = Math.round(Nz/2);
 let ESRC = Array(t.length).fill(1.0);
 for(let i=0; i < ESRC.length; i++)
 {
-	ESRC[i] = 0.1*Math.exp(((-t[i] + t0)/tau)^2);
+	/*The gaussian filter appears to not be working properly*/
+	/*Plot this first*/
+	ESRC[i] = 0.01*Math.exp(((-t[i] + t0)/tau)^2);
 }
+
+ESRCs = ESRC.slice(0, za.length);
 
 
 /*INITIALIZE FDTD PARAMETERS*/
@@ -92,6 +96,8 @@ let Ey = Array(Nz).fill(0.0);
 let Hx = Array(Nz).fill(0.0);
 
 let T = 0;
+
+/*This is a dumb comment*/
 
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -131,10 +137,8 @@ function update()
 	}
 	
 	/*Inject E source*/
-	
 	/*Controlling the amount of source injections gives a better simulation, 
 	ask Dr. Rumpf*/
-
 	if(T < STEPS)
 	{
 		Ey[nz_src] = Ey[nz_src] + ESRC[T];
@@ -147,6 +151,7 @@ function draw()
 	update();
 		
 	context.clearRect(0,0,width,height);
+	plot(context, za, ESRCs, 0, height/2 - 40, "green");
 	plot(context, za, Ey, 0, height/2, "blue");
 	plot(context, za, Hx, 0, height/2, "red");
 	requestAnimationFrame(draw);
