@@ -39,6 +39,11 @@ for(let i = 0; i < za.length; i++)
 let ER = Array(Nz).fill(1.0);
 let UR = Array(Nz).fill(1.0);
 
+for(let i = 100; i < 150; i++)
+{
+	ER[i] = 12.0;
+}
+
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% COMPUTE THE SOURCE
@@ -80,6 +85,14 @@ for(let i=0;i < UR.length;i++)
 /*INITIALIZE FIELDS*/
 let Ey = Array(Nz).fill(0.0);
 let Hx = Array(Nz).fill(0.0);
+
+/*INITIALIZE BOURNDARY TERMS*/
+let H1 = 0;
+let H2 = 0;
+let H3 = 0;
+let E1 = 0;
+let E2 = 0;
+let E3 = 0;
 
 /*GAUSSIAN SOURCE OBJECT*/
 let Gaussian;
@@ -140,18 +153,25 @@ function update()
 	{
 		Hx[nz] = Hx[nz] + mHx[nz]*(Ey[nz+1] - Ey[nz])/dz;
 	}
+	Hx[Nz-1] = Hx[Nz-1] + mHx[Nz-1]*(E3 - Ey[Nz-1])/dz;
 	
-	/*Dirichlet Boundary Condition for Hx*/
-	Hx[Nz-1] = Hx[Nz-1] + mHx[Nz-1]*(0 - Ey[Nz-1])/dz;
+	/*Record H-Field at Boudnary*/
+	H3 = H2;
+	H2 = H1;
+	H1 = Hx[0];
 	
 	
-	/*Dirichlet Boundary Condition for Ey*/
-	Ey[0] = Ey[0] + mEy[0]*(Hx[0] - 0)/dz;
+	Ey[0] = Ey[0] + mEy[0]*(Hx[0] - H3)/dz;
 	/*Update E from H*/
 	for(let nz=1; nz < Nz; nz++)
 	{
 		Ey[nz] = Ey[nz] + mEy[nz]*(Hx[nz] - Hx[nz-1])/dz;
 	}
+	
+	/*Record E-Field at Boundary*/
+	E3 = E2;
+	E2 = E1;
+	E1 = Ey[Nz - 1];
 	
 	/*Inject Gaussian E source*/
 	Gaussian.Inject(Ey, Math.round(Nz/2));
