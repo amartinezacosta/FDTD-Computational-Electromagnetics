@@ -7,21 +7,15 @@ let c0 = 299792458;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DASHBOARD
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/*SOURCE PARAMETERS*/
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+// /*SOURCE PARAMETERS*/
 let fmax = 5.0e9;
-let Amplitude = 50;
-let sigma = 4;
-let std_dev = 2;
-let variance = Math.pow(std_dev, 2);
-let mean = 80;
 
 /*GRID PARAMETERS*/
 /*Ask Dr. Rumpf how is it that I can improve the grid parameters*/
 let nmax = 1;
 let NLAM = 20;
-let NBUFZ = [300, 300];
-
+let NBUFZ = [350, 350];
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% COMPUTE OPTIMIZED GRID
@@ -35,7 +29,6 @@ let Nz = NBUFZ[0] + NBUFZ[1] + 3;
 
 /*COMPUTE AXIS*/
 let za = Array(Nz).fill(1.0);
-
 for(let i = 0; i < za.length; i++)
 {
 	za[i] = i;
@@ -54,32 +47,21 @@ let UR = Array(Nz).fill(1.0);
 let nbc = Math.sqrt(UR[0]*ER[0]);
 let dt = nbc*dz/(2*c0);
 
-/*COMPUTE SOURCE PARAMETERS*/
-let tau = 0.5/fmax;
-let t0 = 5*tau;
+// /*COMPUTE SOURCE PARAMETERS*/
+// let tau = 0.5/fmax;
+// let t0 = 5*tau;
 
-/*COMPUTE NUMBER OF TIME STEPS*/
-let tprop = nmax*Nz*dz/c0;
-let t = 2*t0 + 3*tprop;
-let STEPS = Math.ceil(t/dt);
+// /*COMPUTE NUMBER OF TIME STEPS*/
+// let tprop = nmax*Nz*dz/c0;
+// let t = 2*t0 + 3*tprop;
+// let STEPS = Math.ceil(t/dt);
 
 /*COMPUTE THE SOURCE*/
-t = Array(STEPS).fill(1.0);
-for(let i=0; i < t.length; i++)
-{
-	t[i] = i*dt;
-}
-let nz_src = Math.round(Nz/2);
-let ESRC = Array(Nz).fill(0.0);
-for(let i=0; i < ESRC.length; i++)
-{
-	/*The gaussian filter appears to not be working properly*/
-	/*Plot this first*/
-	let num = Math.pow((za[i] - mean), 2);
-	let den =  Math.pow((variance*2), 2);
-	
-	ESRC[i] = Amplitude*Math.exp(-num/den);
-}
+// t = Array(STEPS).fill(1.0);
+// for(let i=0; i < t.length; i++)
+// {
+	// t[i] = i*dt;
+// }
 
 /*INITIALIZE FDTD PARAMETERS*/
 let mEy = Array(Nz).fill(0);
@@ -99,7 +81,8 @@ for(let i=0;i < UR.length;i++)
 let Ey = Array(Nz).fill(0.0);
 let Hx = Array(Nz).fill(0.0);
 
-let T = 0;
+/*GAUSSIAN SOURCE OBJECT*/
+let Gaussian;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% PERFORM SETUP CODE FOR JAVASCRIPT CANVAS
@@ -112,7 +95,40 @@ function setup()
 	height = canvas.height;
 	
 	requestAnimationFrame(draw);
+	
+	Gaussian = new Source(50, 4, 2, 20, Nz, za);
+	
+	/*Slider callback functions*/
+	Amplitude_Slider = document.getElementById("slider-amplitude");
+	Amplitude_Slider.oninput = Amplitude_Change;
+	
+	Standard_Slider = document.getElementById("slider-standard");
+	Standard_Slider.oninput = Standard_Change;
+	
+	Mean_Slider = document.getElementById("slider-mean");
+	Mean_Slider.oninput = Mean_Change;
 }
+
+function Amplitude_Change()
+{
+	Gaussian.SetAmplitude(Amplitude_Slider.value, za);
+}
+
+function Standard_Change()
+{
+	Gaussian.SetStandard(Standard_Slider.value, za);
+}
+
+function Mean_Change()
+{
+	Gaussian.SetMean(Mean_Slider.value, za);
+}
+
+function Inject_Source()
+{
+	Gaussian.ResetUpdate();
+}
+
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% UPDATE E AND H FIELDS USING THE FDTD IMPLEMENTATION
@@ -137,13 +153,8 @@ function update()
 		Ey[nz] = Ey[nz] + mEy[nz]*(Hx[nz] - Hx[nz-1])/dz;
 	}
 	
-	/*Inject E source*/
-	/*Controlling the amount of source injections gives a better simulation, 
-	ask Dr. Rumpf*/
-	if(T < ESRC.length)
-	{
-		Ey[nz_src] = Ey[nz_src] + ESRC[T++];
-	}
+	/*Inject Gaussian E source*/
+	Gaussian.Inject(Ey, Math.round(Nz/2));
 }
 
 function draw()
@@ -151,7 +162,7 @@ function draw()
 	update();
 		
 	context.clearRect(0,0,width,height);
-	plot(context, za, ESRC, 0, height/2 - Amplitude, "green");
+	plot(context, za, Gaussian.GetSource(), 0, height/2 - 150, "green");
 	plot(context, za, Ey, 0, height/2, "blue");
 	plot(context, za, Hx, 0, height/2, "red");
 	requestAnimationFrame(draw);

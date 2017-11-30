@@ -2,13 +2,32 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
+		<script type="text/javascript" src="source.js"></script>
 		<script type="text/javascript" src="plot.js"></script>
 		<script type="text/javascript" src="FDTD.js"></script>
 		<title>FDTD</title>
 	</head>
 	<body onload="setup()">
-		<canvas id="FDTD-canvas" width="700px" height="500px">
+		<canvas id="FDTD-canvas" width="700px" height="700px" style="float:left">
 			Your browser does not support canvas
 		</canvas>
+		<div id="slider-container">
+			<h4>Amplitude</h4>
+			<input type="range" min="10" max="50" value="50" id="slider-amplitude">
+		</div>
+		
+		<div id="slider-container">
+			<h4>Standard Deviation</h4>
+			<input type="range" min="1" max="50" value="20" id="slider-standard">
+		</div>
+		
+		<div id="slider-container">
+			<h4>Mean</h4>
+			<input type="range" min="1" max="700" value="40" id="slider-mean">
+		</div>
+		
+		<div>
+			<button name="button" onclick="Inject_Source()" style="margin:50px">Inject Source</button>
+		</div>
 	</body>
 </html>
