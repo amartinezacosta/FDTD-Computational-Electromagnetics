@@ -28,6 +28,7 @@ let dz = lam0/nmax/NLAM;
 let Nz = NBUFZ[0] + NBUFZ[1] + 3;
 
 /*COMPUTE AXIS*/
+/*ADD more points*/
 let za = Array(Nz).fill(1.0);
 for(let i = 0; i < za.length; i++)
 {
@@ -51,22 +52,6 @@ for(let i = 100; i < 150; i++)
 /*COMPUTE TIME STEP */
 let nbc = Math.sqrt(UR[0]*ER[0]);
 let dt = nbc*dz/(2*c0);
-
-// /*COMPUTE SOURCE PARAMETERS*/
-// let tau = 0.5/fmax;
-// let t0 = 5*tau;
-
-// /*COMPUTE NUMBER OF TIME STEPS*/
-// let tprop = nmax*Nz*dz/c0;
-// let t = 2*t0 + 3*tprop;
-// let STEPS = Math.ceil(t/dt);
-
-/*COMPUTE THE SOURCE*/
-// t = Array(STEPS).fill(1.0);
-// for(let i=0; i < t.length; i++)
-// {
-	// t[i] = i*dt;
-// }
 
 /*INITIALIZE FDTD PARAMETERS*/
 let mEy = Array(Nz).fill(0);
