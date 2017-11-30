@@ -8,21 +8,17 @@ let c0 = 299792458;
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DASHBOARD
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-// /*SOURCE PARAMETERS*/
+
 let fmax = 5.0e9;
 
 /*GRID PARAMETERS*/
-/*Ask Dr. Rumpf how is it that I can improve the grid parameters*/
 let nmax = 1;
-let NLAM = 20;
-let NBUFZ = [350, 350];
-
-/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% COMPUTE OPTIMIZED GRID
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/*NOMINAL RESOLUTION*/
+let NLAM = 100;
 let lam0 = c0/fmax;
 let dz = lam0/nmax/NLAM;
+
+/*GRID PARAMETERS*/
+let NBUFZ = [350, 350];
 
 /*COMPUTE GRID SIZE*/
 let Nz = NBUFZ[0] + NBUFZ[1] + 3;
@@ -33,38 +29,6 @@ let za = Array(Nz).fill(1.0);
 for(let i = 0; i < za.length; i++)
 {
 	za[i] = i;
-}
-/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% BUILD DEVICE ON GRID
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-let ER = Array(Nz).fill(1.0);
-let UR = Array(Nz).fill(1.0);
-
-for(let i = 100; i < 150; i++)
-{
-	ER[i] = 12.0;
-}
-
-
-/*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% COMPUTE THE SOURCE
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/*COMPUTE TIME STEP */
-let nbc = Math.sqrt(UR[0]*ER[0]);
-let dt = nbc*dz/(2*c0);
-
-/*INITIALIZE FDTD PARAMETERS*/
-let mEy = Array(Nz).fill(0);
-let mHx = Array(Nz).fill(0);
-
-for(let i=0;i < ER.length;i++)
-{
-	mEy[i] = (c0*dt)/ER[i];
-}
-
-for(let i=0;i < UR.length;i++)
-{
-	mHx[i] = (c0*dt)/UR[i];
 }
 
 /*INITIALIZE FIELDS*/
@@ -82,6 +46,9 @@ let E3 = 0;
 /*GAUSSIAN SOURCE OBJECT*/
 let Gaussian;
 
+/*DEVICE OBJECT*/
+let Slab;
+
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% PERFORM SETUP CODE FOR JAVASCRIPT CANVAS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -95,6 +62,7 @@ function setup()
 	requestAnimationFrame(draw);
 	
 	Gaussian = new Source(50, 4, 2, 20, Nz, za);
+	Slab = new Device(1.0, 5.0, 1.0, 1.0, 5.0e9, Nz, Nz/2 + 200, dz, 150, 150);
 	
 	/*Slider callback functions*/
 	Amplitude_Slider = document.getElementById("slider-amplitude");
@@ -136,9 +104,9 @@ function update()
 	/*Update H from E*/
 	for(let nz=0; nz < Nz-1; nz++)
 	{
-		Hx[nz] = Hx[nz] + mHx[nz]*(Ey[nz+1] - Ey[nz])/dz;
+		Hx[nz] = Hx[nz] + Slab.GetmHx(nz)*(Ey[nz+1] - Ey[nz])/dz;
 	}
-	Hx[Nz-1] = Hx[Nz-1] + mHx[Nz-1]*(E3 - Ey[Nz-1])/dz;
+	Hx[Nz-1] = Hx[Nz-1] + Slab.GetmHx(Nz-1)*(E3 - Ey[Nz-1])/dz;
 	
 	/*Record H-Field at Boudnary*/
 	H3 = H2;
@@ -146,11 +114,11 @@ function update()
 	H1 = Hx[0];
 	
 	
-	Ey[0] = Ey[0] + mEy[0]*(Hx[0] - H3)/dz;
+	Ey[0] = Ey[0] + Slab.GetmEy(0)*(Hx[0] - H3)/dz;
 	/*Update E from H*/
 	for(let nz=1; nz < Nz; nz++)
 	{
-		Ey[nz] = Ey[nz] + mEy[nz]*(Hx[nz] - Hx[nz-1])/dz;
+		Ey[nz] = Ey[nz] + Slab.GetmEy(nz)*(Hx[nz] - Hx[nz-1])/dz;
 	}
 	
 	/*Record E-Field at Boundary*/
@@ -170,6 +138,7 @@ function draw()
 	plot(context, za, Gaussian.GetSource(), 0, height/2 - 150, "green");
 	plot(context, za, Ey, 0, height/2, "blue");
 	plot(context, za, Hx, 0, height/2, "red");
+	Slab.Draw(context, height/2);
 	requestAnimationFrame(draw);
 }
 
