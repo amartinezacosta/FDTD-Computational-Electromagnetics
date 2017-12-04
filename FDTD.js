@@ -59,20 +59,23 @@ function setup()
 	width = canvas.width;
 	height = canvas.height;
 	
-	requestAnimationFrame(draw);
-	
+	/*Create Source and Device*/
 	Gaussian = new Source(50, 4, 2, 20, Nz, za);
-	Slab = new Device(1.0, 5.0, 1.0, 1.0, 5.0e9, Nz, Nz/2 + 200, dz, 150, 150);
+	Slab = new Device(1.0, 5.0, 1.0, 1.0, 5.0e9, Nz, Nz/2 + 250, dz, 150, 150);
 	
-	/*Slider callback functions*/
+	/*Amplitude Slider callback functions*/
 	Amplitude_Slider = document.getElementById("slider-amplitude");
 	Amplitude_Slider.oninput = Amplitude_Change;
 	
+	/*Standard Deviation callback functions*/
 	Standard_Slider = document.getElementById("slider-standard");
 	Standard_Slider.oninput = Standard_Change;
 	
+	/*Mean callback functions*/
 	Mean_Slider = document.getElementById("slider-mean");
 	Mean_Slider.oninput = Mean_Change;
+	
+	requestAnimationFrame(draw);
 }
 
 function Amplitude_Change()

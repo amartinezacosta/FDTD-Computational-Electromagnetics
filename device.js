@@ -78,7 +78,7 @@ class Device
 		let x1 = this.z - w2;
 		let y1 = y - h2;
 		
-		context.globalAlpha = 0.2;
+		context.globalAlpha = 0.4;
 		context.fillRect(x1, y1, this.width, this.height);
 		context.globalAlpha = 1.0;
 	}
