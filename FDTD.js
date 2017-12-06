@@ -61,6 +61,7 @@ function setup()
 	
 	/*Create Source and Device*/
 	Gaussian = new Source(50, 4, 2, 20, Nz, za);
+	/*Recalculate every time there is a new device*/
 	Slab = new Device(1.0, 5.0, 1.0, 1.0, 5.0e9, Nz, Nz/2 + 250, dz, 150, 150);
 	
 	/*Amplitude Slider callback functions*/
