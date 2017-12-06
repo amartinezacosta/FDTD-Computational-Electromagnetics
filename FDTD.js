@@ -21,7 +21,7 @@ let dz = lam0/nmax/NLAM;
 let NBUFZ = [350, 350];
 
 /*COMPUTE GRID SIZE*/
-let Nz = NBUFZ[0] + NBUFZ[1] + 3;
+let Nz = NBUFZ[0] + NBUFZ[1];
 
 /*COMPUTE AXIS*/
 /*ADD more points*/
@@ -47,7 +47,9 @@ let E3 = 0;
 let Gaussian;
 
 /*DEVICE OBJECT*/
-let Slab;
+let Global;
+let Slab1;
+let Slab2;
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% PERFORM SETUP CODE FOR JAVASCRIPT CANVAS
@@ -62,8 +64,15 @@ function setup()
 	/*Create Source and Device*/
 	Gaussian = new Source(50, 4, 2, 20, Nz, za);
 	/*Recalculate every time there is a new device*/
-	Slab = new Device(1.0, 5.0, 1.0, 1.0, 5.0e9, Nz, Nz/2 + 250, dz, 150, 150);
+	Global = new Device(1.0, 1.0, width, 0, 0, dz);
+	Slab1 = new Device(5.0, 1.0, 50, 150, Nz/2 + 150, dz);
+	Slab2 = new Device(12.0, 1.0, 50, 150, Nz/2 + 250, dz);
+	Slab3 = new Device(30.0, 1.0, 50, 150, Nz/2 + 50, dz);
 	
+	Global.AddDevice(Slab1);
+	Global.AddDevice(Slab2);
+	Global.AddDevice(Slab3);
+		
 	/*Amplitude Slider callback functions*/
 	Amplitude_Slider = document.getElementById("slider-amplitude");
 	Amplitude_Slider.oninput = Amplitude_Change;
@@ -108,9 +117,9 @@ function update()
 	/*Update H from E*/
 	for(let nz=0; nz < Nz-1; nz++)
 	{
-		Hx[nz] = Hx[nz] + Slab.GetmHx(nz)*(Ey[nz+1] - Ey[nz])/dz;
+		Hx[nz] = Hx[nz] + Global.GetmHx(nz)*(Ey[nz+1] - Ey[nz])/dz;
 	}
-	Hx[Nz-1] = Hx[Nz-1] + Slab.GetmHx(Nz-1)*(E3 - Ey[Nz-1])/dz;
+	Hx[Nz-1] = Hx[Nz-1] + Global.GetmHx(Nz-1)*(E3 - Ey[Nz-1])/dz;
 	
 	/*Record H-Field at Boudnary*/
 	H3 = H2;
@@ -118,11 +127,11 @@ function update()
 	H1 = Hx[0];
 	
 	
-	Ey[0] = Ey[0] + Slab.GetmEy(0)*(Hx[0] - H3)/dz;
+	Ey[0] = Ey[0] + Global.GetmEy(0)*(Hx[0] - H3)/dz;
 	/*Update E from H*/
 	for(let nz=1; nz < Nz; nz++)
 	{
-		Ey[nz] = Ey[nz] + Slab.GetmEy(nz)*(Hx[nz] - Hx[nz-1])/dz;
+		Ey[nz] = Ey[nz] + Global.GetmEy(nz)*(Hx[nz] - Hx[nz-1])/dz;
 	}
 	
 	/*Record E-Field at Boundary*/
@@ -142,7 +151,11 @@ function draw()
 	plot(context, za, Gaussian.GetSource(), 0, height/2 - 150, "green");
 	plot(context, za, Ey, 0, height/2, "blue");
 	plot(context, za, Hx, 0, height/2, "red");
-	Slab.Draw(context, height/2);
+	
+	Slab1.Draw(context, height/2);
+	Slab2.Draw(context, height/2);
+	Slab3.Draw(context, height/2);
+	
 	requestAnimationFrame(draw);
 }
 
