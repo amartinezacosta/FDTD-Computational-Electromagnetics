@@ -68,8 +68,8 @@ function setup()
 	
 	/*Create devices */
 	Slab1 = new Device(5.0, 1.0, 50, 150, Nz/2 + 150, dz);
-	Slab2 = new Device(12.0, 1.0, 50, 150, Nz/2 + 250, dz);
-	Slab3 = new Device(30.0, 1.0, 50, 150, Nz/2 + 50, dz);
+	Slab2 = new Device(5.0, 1.0, 50, 150, Nz/2 + 250, dz);
+	Slab3 = new Device(5.0, 1.0, 50, 150, Nz/2 + 50, dz);
 	
 	/*Add slabs to global device*/
 	Global.AddDevice(Slab1);
