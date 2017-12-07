@@ -88,6 +88,18 @@ function setup()
 	Mean_Slider = document.getElementById("slider-mean");
 	Mean_Slider.oninput = Mean_Change;
 	
+	/*Device 1 callback function*/
+	Device_Slider1 = document.getElementById("slider-device1");
+	Device_Slider1.oninput = Permitivitty1_Change;
+	
+	/*Device 2 callback function*/
+	Device_Slider2 = document.getElementById("slider-device2");
+	Device_Slider2.oninput = Permitivitty2_Change;
+	
+	/*Device 3 callback function*/
+	Device_Slider3 = document.getElementById("slider-device3");
+	Device_Slider3.oninput = Permitivitty3_Change;
+	
 	requestAnimationFrame(draw);
 }
 
@@ -111,6 +123,20 @@ function Inject_Source()
 	Gaussian.ResetUpdate();
 }
 
+function Permitivitty1_Change()
+{
+	Slab1.SetPermitivitty(Global, Device_Slider1.value);
+}
+
+function Permitivitty2_Change()
+{
+	Slab2.SetPermitivitty(Global, Device_Slider2.value);
+}
+
+function Permitivitty3_Change()
+{
+	Slab3.SetPermitivitty(Global, Device_Slider3.value);
+}
 
 /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% UPDATE E AND H FIELDS USING THE FDTD IMPLEMENTATION
@@ -151,6 +177,7 @@ function draw()
 	update();
 		
 	context.clearRect(0,0,width,height);
+	
 	/*Plot Sources*/
 	plot(context, za, Gaussian.GetSource(), 0, height/2 - 150, "green");
 	plot(context, za, Ey, 0, height/2, "blue");

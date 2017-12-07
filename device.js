@@ -11,20 +11,20 @@ class Device
 		
 		/*c0 should be a global constant*/
 		let c0  = 299792458;
-		let nbc = Math.sqrt(er*ur);
-		let dt = nbc*dz/(2*c0);
+		this.nbc = Math.sqrt(er*ur);
+		this.dt = this.nbc*dz/(2*c0);
 		
 		this.mEy = Array(width).fill(0);
 		this.mHx = Array(width).fill(0);
 		
 		for(let i = 0; i < this.mEy.length; i++)
 		{
-			this.mEy[i] = (c0*dt)/er;
+			this.mEy[i] = (c0*this.dt)/this.er;
 		}
 		
 		for(let i = 0; i < this.mHx.length; i++)
 		{
-			this.mHx[i] = (c0*dt)/ur;
+			this.mHx[i] = (c0*this.dt)/this.ur;
 		}
 	}
 	
@@ -58,7 +58,6 @@ class Device
 		return this.height;
 	}
 	
-	
 	AddDevice(Device)
 	{
 		let w1 = Math.round(Device.position - Device.width/2);
@@ -72,6 +71,24 @@ class Device
 		}
 	}
 	
+	SetPermitivitty(Global, er)
+	{
+		this.er = er;
+		/*Recalculate permittivity of device*/
+		let c0  = 299792458;
+		for(let i = 0; i < this.mEy.length; i++)
+		{
+			this.mEy[i] = (c0*this.dt)/this.er;
+		}
+		
+		for(let i = 0; i < this.mHx.length; i++)
+		{
+			this.mHx[i] = (c0*this.dt)/this.ur;
+		}
+		
+		Global.AddDevice(this);
+	}
+	
 	Draw(context, y)
 	{
 		if(this.er > 1.0 || this.ur > 1.0)
@@ -82,7 +99,8 @@ class Device
 			let x1 = this.position - w2;
 			let y1 = y - h2;
 		
-			context.globalAlpha = 0.4;
+			let alpha = 0.017*this.er + 0.0813;
+			context.globalAlpha = alpha;
 			context.fillRect(x1, y1, this.width, this.height);
 			context.globalAlpha = 1.0;
 		}
