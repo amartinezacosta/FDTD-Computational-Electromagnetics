@@ -24,7 +24,6 @@ let NBUFZ = [350, 350];
 let Nz = NBUFZ[0] + NBUFZ[1];
 
 /*COMPUTE AXIS*/
-/*ADD more points*/
 let za = Array(Nz).fill(1.0);
 for(let i = 0; i < za.length; i++)
 {
@@ -35,7 +34,7 @@ for(let i = 0; i < za.length; i++)
 let Ey = Array(Nz).fill(0.0);
 let Hx = Array(Nz).fill(0.0);
 
-/*INITIALIZE BOURNDARY TERMS*/
+/*INITIALIZE BOUNDARY TERMS*/
 let H1 = 0;
 let H2 = 0;
 let H3 = 0;
@@ -46,7 +45,7 @@ let E3 = 0;
 /*GAUSSIAN SOURCE OBJECT*/
 let Gaussian;
 
-/*DEVICE OBJECT*/
+/*DEVICE OBJECTS*/
 let Global;
 let Slab1;
 let Slab2;
@@ -61,14 +60,18 @@ function setup()
 	width = canvas.width;
 	height = canvas.height;
 	
-	/*Create Source and Device*/
+	/*Create Source*/
 	Gaussian = new Source(50, 4, 2, 20, Nz, za);
-	/*Recalculate every time there is a new device*/
+	
+	/*Create global device filled with air*/
 	Global = new Device(1.0, 1.0, width, 0, 0, dz);
+	
+	/*Create devices */
 	Slab1 = new Device(5.0, 1.0, 50, 150, Nz/2 + 150, dz);
 	Slab2 = new Device(12.0, 1.0, 50, 150, Nz/2 + 250, dz);
 	Slab3 = new Device(30.0, 1.0, 50, 150, Nz/2 + 50, dz);
 	
+	/*Add slabs to global device*/
 	Global.AddDevice(Slab1);
 	Global.AddDevice(Slab2);
 	Global.AddDevice(Slab3);
@@ -148,10 +151,12 @@ function draw()
 	update();
 		
 	context.clearRect(0,0,width,height);
+	/*Plot Sources*/
 	plot(context, za, Gaussian.GetSource(), 0, height/2 - 150, "green");
 	plot(context, za, Ey, 0, height/2, "blue");
 	plot(context, za, Hx, 0, height/2, "red");
 	
+	/*Draw slabs*/
 	Slab1.Draw(context, height/2);
 	Slab2.Draw(context, height/2);
 	Slab3.Draw(context, height/2);
